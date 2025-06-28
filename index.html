@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CR7 & Messi Live Stats</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 20px;
+    }
+    .player-card {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      width: 200px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .player-card h2 {
+      margin: 0 0 10px;
+    }
+    .stats p {
+      margin: 5px 0;
+      font-size: 1.1em;
+    }
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-bottom: 10px;
+      object-fit: cover;
+    }
+    @media (max-width: 600px) {
+      body { flex-direction: column; align-items: center; }
+      .player-card { width: 90%; max-width: 300px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="cr7" class="player-card">
+    <img class="avatar" src="" alt="Foto Cristiano Ronaldo" />
+    <h2>Cristiano Ronaldo</h2>
+    <div class="stats">
+      <p>Goles: <span class="goals">–</span></p>
+      <p>Asistencias: <span class="assists">–</span></p>
+    </div>
+  </div>
+  <div id="messi" class="player-card">
+    <img class="avatar" src="" alt="Foto Lionel Messi" />
+    <h2>Lionel Messi</h2>
+    <div class="stats">
+      <p>Goles: <span class="goals">–</span></p>
+      <p>Asistencias: <span class="assists">–</span></p>
+    </div>
+  </div>
+
+  <script>
+    const players = [
+      { id: '874', el: document.getElementById('cr7') },   // Ronaldo
+      { id: '154', el: document.getElementById('messi') }  // Messi
+    ];
+
+    async function updateStats() {
+      for (const p of players) {
+        const avatarEl = p.el.querySelector('.avatar');
+        try {
+          const res = await fetch(`/api/stats?id=${p.id}`);
+          if (!res.ok) throw new Error('Error en proxy');
+          const data = await res.json();
+          // Actualiza goles y asistencias
+          p.el.querySelector('.goals').textContent   = data.goles;
+          p.el.querySelector('.assists').textContent = data.asist;
+          // Actualiza foto si viene en el JSON
+          if (data.photo) {
+            avatarEl.src = data.photo;
+          }
+        } catch (e) {
+          // En caso de error, dejamos los valores en “–”
+          p.el.querySelector('.goals').textContent   = '–';
+          p.el.querySelector('.assists').textContent = '–';
+          avatarEl.src = ''; 
+        }
+      }
+    }
+
+    // Primera carga y refresco cada 30 segundos
+    updateStats();
+    setInterval(updateStats, 30000);
+  </script>
+</body>
+</html>
